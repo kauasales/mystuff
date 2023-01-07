@@ -22,7 +22,7 @@ def draw_objects(obj, w, h, x, y, data):
 
 
 def hud_draw(x, y, score):
-    font = pygame.font.Font('freesansbold.ttf', 32)
+    font = pygame.font.Font('data/PressStart2P.ttf', 32)
     text = font.render(f"{score}", True, (255, 255, 255), (0, 0, 0))
     text_rect = text.get_rect()
     text_rect.center = (x, y)
@@ -43,20 +43,20 @@ y = 300
 
 for i in range(8):
     y = y - 15
-    x = 34
-    for j in range(12):
+    x = 30
+    for j in range(14):
         brick = pygame.sprite.Sprite(drawGroup)
         brick.image = pygame.image.load(f"data/{colors[i]}.png")
-        brick.image = pygame.transform.scale(brick.image, [40, 11])
+        brick.image = pygame.transform.scale(brick.image, [35, 11])
         brick.rect = pygame.Rect(x, y, 0, 0)
         x_pos.append(x)
         y_pos.append(y)
         bricks_count.append(brick)
 
-        x = x + 45
+        x = x + 39
 print(x_pos)
 print(y_pos)
-print(bricks_count)
+print(len(bricks_count))
 
 # Initial scores
 
@@ -109,7 +109,7 @@ while game_loop:
         ball_dy *= -1
 
     # Collision with the paddle
-    if ball.rect.y == paddle.rect.y and paddle.rect.x + 40 > ball.rect.x > paddle.rect.x - 30:
+    if ball.rect.y == paddle.rect.y and paddle.rect.x + 50 > ball.rect.x > paddle.rect.x - 30:
         ball_dy *= -1
 
     # Collision with the floor
@@ -121,14 +121,16 @@ while game_loop:
         birth_score += 1
 
     # Collision with the brick
-    if birth_score <= 4:
+    if birth_score <= 100:
         for brick in bricks_count:
-            if ball.rect.y < brick.rect.y - 10 and brick.rect.x + 20 > ball.rect.x > brick.rect.x - 20:
+            if brick.rect.y > ball.rect.y > brick.rect.y - 20 \
+                    and brick.rect.x + 20 > ball.rect.x > brick.rect.x - 20:
                 brick.rect = pygame.Rect(1000, 1000, 0, 0)
                 ball_dy *= -1
                 brick_score += 1
+                bricks_count.remove(brick)
 
-    if birth_score > 4:
+    if birth_score > 100:
         paddle.rect.x = -35
         paddle.image = pygame.transform.scale(paddle.image, [655, 60])
 
@@ -143,10 +145,22 @@ while game_loop:
 
     # Draw Hud
     drawGroup.draw(screen)
-    hud_draw(80, 60, '000')
-    hud_draw(110, 100, brick_score)
-    hud_draw(440, 60, birth_score)
-    hud_draw(470, 100, '000')
+
+    if len(bricks_count) == 112:
+        hud_draw(80, 60, '1')
+        hud_draw(110, 100, '000')
+        hud_draw(440, 60, birth_score)
+        hud_draw(470, 100, '000')
+
+    else:
+        hud_draw(80, 60, '1')
+        hud_draw(110, 100, brick_score)
+        hud_draw(440, 60, birth_score)
+        hud_draw(470, 100, '000')
+
+    # Game ending
+    if len(bricks_count) == 0:
+        hud_draw(300, 400, 'GAME IS OVER! YOU WON!')
 
     # Display update
-    pygame.display.update()
+    pygame.display.flip()
