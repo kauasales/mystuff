@@ -87,8 +87,8 @@ birth_score = 1
 brick_score = 0
 
 # Initial ball coordinates
-ball_dx = 4
-ball_dy = 4
+ball_dx = 2
+ball_dy = 2
 
 # Game looping
 game_loop = True
