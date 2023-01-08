@@ -1,5 +1,6 @@
 import pygame
 import time
+import math
 
 pygame.init()
 
@@ -8,8 +9,8 @@ screen = pygame.display.set_mode((600, 800))
 pygame.display.set_caption("Breakout")
 
 # Defining sound effects
-bounce_sound = pygame.mixer.Sound('data/bounce_sound.wav')
-brick_sound = pygame.mixer.Sound('data/brick_sound.wav')
+bounce_sound = pygame.mixer.Sound('bounce.wav')
+brick_sound = pygame.mixer.Sound('brick_sound.wav')
 
 # Color list
 blue = (77, 109, 243)
@@ -33,7 +34,7 @@ def draw_objects(obj, w, h, x, y, data):
 
 
 def hud_draw(x, y, score, size, bst):
-    font = pygame.font.Font('data/PressStart2P.ttf', size)
+    font = pygame.font.Font('PressStart2P.ttf', size)
     if bst:
         score = str(score).zfill(3)
     text = font.render(f"{score}", True, (255, 255, 255), (0, 0, 0))
@@ -55,9 +56,9 @@ def draw_border_details():
     pygame.draw.line(screen, yellow, (576, 268), (576, 296), 12)
 
 
-draw_objects(edge, 600, 900, 7, 0, "data/Edge.png")
-draw_objects(paddle, 40, 60, 270, 700, "data/Paddle.png")
-draw_objects(ball, 8, 8, 298, 700, "data/Ball.png")
+draw_objects(edge, 600, 900, 7, 0, "Edge.png")
+draw_objects(paddle, 40, 60, 270, 700, "Paddle.png")
+draw_objects(ball, 8, 8, 298, 700, "Ball.png")
 
 # Drawing the bricks
 colors = ['YellowBrick', 'YellowBrick', 'GreenBrick', 'GreenBrick',
@@ -72,7 +73,7 @@ for i in range(8):
     x = 30
     for j in range(14):
         brick = pygame.sprite.Sprite(drawGroup)
-        brick.image = pygame.image.load(f"data/{colors[i]}.png")
+        brick.image = pygame.image.load(f"{colors[i]}.png")
         brick.image = pygame.transform.scale(brick.image, [35, 11])
         brick.rect = pygame.Rect(x, y, 0, 0)
         x_pos.append(x)
@@ -115,38 +116,68 @@ while game_loop:
 
     # Collision with the right wall
     if ball.rect.x >= 565:
+        if ball.rect.x > 565:
+            ball.rect.x = 559.9
         ball_dx *= -1
         bounce_sound.play()
 
     # Collision with the left wall
     if ball.rect.x <= 25:
+        if ball.rect.x < 25:
+            ball.rect.x = 26
         ball_dx *= -1
         bounce_sound.play()
 
-    # Collision with the roof
+    # Collision with the upper wall
     if ball.rect.y <= 15:
-        ball_dy *= -1
+        if ball.rect.y < 15:
+            ball.rect.y = 18
+            ball_dy = -2
         bounce_sound.play()
 
     # Collision with the paddle
-    if ball.rect.y == (paddle.rect.y + 12) and paddle.rect.x + 50 > ball.rect.x > paddle.rect.x - 30:
-        ball_dy *= -1
-        bounce_sound.play()
+    if ball.rect.y == (paddle.rect.y + 12):
+        # Left far corner
+        if paddle.rect.x + 5 >= ball.rect.x >= paddle.rect.x - 5:
+            ball_dy *= -math.sin(math.radians(30))
+            bounce_sound.play()
+            ball_dx *= -1
+        # Left corner
+        if paddle.rect.x + 15 >= ball.rect.x > paddle.rect.x + 5:
+            ball_dy *= -math.sin(math.radians(60))
+            bounce_sound.play()
+        # Middle
+        if paddle.rect.x + 25 >= ball.rect.x > paddle.rect.x + 15:
+            ball_dy *= -1
+            ball_dx *= 0.5
+            bounce_sound.play()
+        # Right corner
+        if paddle.rect.x + 35 >= ball.rect.x > paddle.rect.x + 25:
+            ball_dy *= -math.sin(math.radians(120))
+            bounce_sound.play()
+        # Right far corner
+        if paddle.rect.x + 45 >= ball.rect.x > paddle.rect.x + 35:
+            ball_dy *= -math.sin(math.radians(150))
+            ball_dx *= -1
+            bounce_sound.play()
 
     # Collision with the floor
     if ball.rect.y > paddle.rect.y + 100:
         time.sleep(2)
-        ball.rect.y = paddle.rect.y - 400
+        ball.rect.y = 400
         ball.rect.x = 300
         paddle.rect.x = 270
         birth_score += 1
+        ball_dy = -2
 
     # Collision with the brick
-    if birth_score <= 100:
+    if birth_score <= 4:
         for brick in bricks_count:
             if brick.rect.y > ball.rect.y > brick.rect.y - 10 \
-                    and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 35:
-                ball_dy *= -1
+                and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 35:
+                ball_dx = 2
+                ball_dy = -2
+
                 bounce_sound.play()
 
                 if brick.rect.y > 255:
@@ -164,7 +195,7 @@ while game_loop:
                 brick.rect = pygame.Rect(1000, 1000, 0, 0)
                 bricks_count.remove(brick)
 
-    if birth_score > 100:
+    if birth_score > 4:
         paddle.rect.x = -35
         paddle.image = pygame.transform.scale(paddle.image, [655, 60])
 
