@@ -81,6 +81,7 @@ for i in range(8):
 
         x = x + 39
 
+print(y_pos)
 # Initial scores
 birth_score = 1
 brick_score = 0
@@ -141,17 +142,29 @@ while game_loop:
         birth_score += 1
 
     # Collision with the brick
-    if birth_score <= 4:
+    if birth_score <= 100:
         for brick in bricks_count:
             if brick.rect.y > ball.rect.y > brick.rect.y - 10 \
-                    and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 40:
-                brick.rect = pygame.Rect(1000, 1000, 0, 0)
+                    and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 35:
                 ball_dy *= -1
-                brick_score += 1
-                bricks_count.remove(brick)
                 bounce_sound.play()
 
-    if birth_score > 4:
+                if brick.rect.y > 255:
+                    brick_score += 1
+
+                elif brick.rect.y > 225:
+                    brick_score += 3
+
+                elif brick.rect.y > 195:
+                    brick_score += 5
+
+                else:
+                    brick_score += 7
+
+                brick.rect = pygame.Rect(1000, 1000, 0, 0)
+                bricks_count.remove(brick)
+
+    if birth_score > 100:
         paddle.rect.x = -35
         paddle.image = pygame.transform.scale(paddle.image, [655, 60])
 
