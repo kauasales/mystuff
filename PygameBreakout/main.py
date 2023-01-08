@@ -139,24 +139,34 @@ while game_loop:
     if ball.rect.y == (paddle.rect.y + 12):
         # Left far corner
         if paddle.rect.x + 5 >= ball.rect.x >= paddle.rect.x - 5:
+            if ball.rect.y > paddle.rect.y:
+                ball.rect.y = paddle.rect.y + 12
             ball_dy *= -math.sin(math.radians(30))
             bounce_sound.play()
             ball_dx *= -1
         # Left corner
-        if paddle.rect.x + 15 >= ball.rect.x > paddle.rect.x + 5:
+        if paddle.rect.x + 15 >= ball.rect.x >= paddle.rect.x + 5:
+            if ball.rect.y > paddle.rect.y:
+                ball.rect.y = paddle.rect.y + 12
             ball_dy *= -math.sin(math.radians(60))
             bounce_sound.play()
         # Middle
-        if paddle.rect.x + 25 >= ball.rect.x > paddle.rect.x + 15:
+        if paddle.rect.x + 25 >= ball.rect.x >= paddle.rect.x + 15:
+            if ball.rect.y > paddle.rect.y:
+                ball.rect.y = paddle.rect.y + 12
             ball_dy *= -1
             ball_dx *= 0.5
             bounce_sound.play()
         # Right corner
-        if paddle.rect.x + 35 >= ball.rect.x > paddle.rect.x + 25:
+        if paddle.rect.x + 35 >= ball.rect.x >= paddle.rect.x + 25:
+            if ball.rect.y > paddle.rect.y:
+                ball.rect.y = paddle.rect.y + 12
             ball_dy *= -math.sin(math.radians(120))
             bounce_sound.play()
         # Right far corner
-        if paddle.rect.x + 45 >= ball.rect.x > paddle.rect.x + 35:
+        if paddle.rect.x + 45 >= ball.rect.x >= paddle.rect.x + 35:
+            if ball.rect.y > paddle.rect.y:
+                ball.rect.y = paddle.rect.y + 12
             ball_dy *= -math.sin(math.radians(150))
             ball_dx *= -1
             bounce_sound.play()
@@ -171,10 +181,10 @@ while game_loop:
         ball_dy = -2
 
     # Collision with the brick
-    if birth_score <= 4:
+    if birth_score <= 100:
         for brick in bricks_count:
             if brick.rect.y > ball.rect.y > brick.rect.y - 10 \
-                and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 35:
+                    and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 35:
                 ball_dx = 2
                 ball_dy = -2
 
@@ -195,7 +205,7 @@ while game_loop:
                 brick.rect = pygame.Rect(1000, 1000, 0, 0)
                 bricks_count.remove(brick)
 
-    if birth_score > 4:
+    if birth_score > 100:
         paddle.rect.x = -35
         paddle.image = pygame.transform.scale(paddle.image, [655, 60])
 
