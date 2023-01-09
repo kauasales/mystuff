@@ -27,19 +27,19 @@ paddle = pygame.sprite.Sprite(drawGroup)
 ball = pygame.sprite.Sprite(drawGroup)
 
 
-def draw_objects(obj, w, h, x, y, data):
+def draw_objects(obj, w, h, xx, yy, data):
     obj.image = pygame.image.load(data)
     obj.image = pygame.transform.scale(obj.image, [w, h])
-    obj.rect = pygame.Rect(x, y, 0, 0)
+    obj.rect = pygame.Rect(xx, yy, 0, 0)
 
 
-def hud_draw(x, y, score, size, bst):
+def hud_draw(tx, ty, score, size, bst):
     font = pygame.font.Font('PressStart2P.ttf', size)
     if bst:
         score = str(score).zfill(3)
     text = font.render(f"{score}", True, (255, 255, 255), (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center = (x, y)
+    text_rect.center = (tx, ty)
     screen.blit(text, text_rect)
 
 
@@ -56,9 +56,14 @@ def draw_border_details():
     pygame.draw.line(screen, yellow, (576, 268), (576, 296), 12)
 
 
+def check_paddle_collision():
+    if paddle.rect.y + 15 >= ball.rect.y >= paddle.rect.y + 12 and paddle.rect.x + 45 >= ball.rect.x >= paddle.rect.x:
+        ball.rect.y = paddle.rect.y + 10
+
+
 draw_objects(edge, 600, 900, 7, 0, "Edge.png")
 draw_objects(paddle, 40, 60, 270, 700, "Paddle.png")
-draw_objects(ball, 8, 8, 298, 700, "Ball.png")
+draw_objects(ball, 8, 8, 298, 400, "Ball.png")
 
 # Drawing the bricks
 colors = ['YellowBrick', 'YellowBrick', 'GreenBrick', 'GreenBrick',
@@ -88,13 +93,15 @@ birth_score = 1
 brick_score = 0
 
 # Initial ball coordinates
-ball_dx = 2
-ball_dy = 2
+ball_dx = 2.5
+ball_dy = -2.5
 
 # Game looping
 game_loop = True
 
 while game_loop:
+
+    check_paddle_collision()
 
     for event in pygame.event.get():
 
@@ -132,41 +139,36 @@ while game_loop:
     if ball.rect.y <= 15:
         if ball.rect.y < 15:
             ball.rect.y = 18
-            ball_dy = -2
+            ball_dy = -2.5
         bounce_sound.play()
 
     # Collision with the paddle
     if ball.rect.y == (paddle.rect.y + 12):
         # Left far corner
         if paddle.rect.x + 5 >= ball.rect.x >= paddle.rect.x - 5:
-            if ball.rect.y > paddle.rect.y:
-                ball.rect.y = paddle.rect.y + 12
+            check_paddle_collision()
             ball_dy *= -math.sin(math.radians(30))
             bounce_sound.play()
             ball_dx *= -1
         # Left corner
-        if paddle.rect.x + 15 >= ball.rect.x >= paddle.rect.x + 5:
-            if ball.rect.y > paddle.rect.y:
-                ball.rect.y = paddle.rect.y + 12
+        if paddle.rect.x + 15 >= ball.rect.x > paddle.rect.x + 5:
+            check_paddle_collision()
             ball_dy *= -math.sin(math.radians(60))
             bounce_sound.play()
         # Middle
-        if paddle.rect.x + 25 >= ball.rect.x >= paddle.rect.x + 15:
-            if ball.rect.y > paddle.rect.y:
-                ball.rect.y = paddle.rect.y + 12
+        if paddle.rect.x + 25 >= ball.rect.x > paddle.rect.x + 15:
+            check_paddle_collision()
             ball_dy *= -1
             ball_dx *= 0.5
             bounce_sound.play()
         # Right corner
-        if paddle.rect.x + 35 >= ball.rect.x >= paddle.rect.x + 25:
-            if ball.rect.y > paddle.rect.y:
-                ball.rect.y = paddle.rect.y + 12
+        if paddle.rect.x + 35 >= ball.rect.x > paddle.rect.x + 25:
+            check_paddle_collision()
             ball_dy *= -math.sin(math.radians(120))
             bounce_sound.play()
         # Right far corner
-        if paddle.rect.x + 45 >= ball.rect.x >= paddle.rect.x + 35:
-            if ball.rect.y > paddle.rect.y:
-                ball.rect.y = paddle.rect.y + 12
+        if paddle.rect.x + 45 >= ball.rect.x > paddle.rect.x + 35:
+            check_paddle_collision()
             ball_dy *= -math.sin(math.radians(150))
             ball_dx *= -1
             bounce_sound.play()
@@ -178,15 +180,21 @@ while game_loop:
         ball.rect.x = 300
         paddle.rect.x = 270
         birth_score += 1
-        ball_dy = -2
+        ball_dy = -2.5
 
     # Collision with the brick
-    if birth_score <= 100:
+    if birth_score <= 4:
         for brick in bricks_count:
             if brick.rect.y > ball.rect.y > brick.rect.y - 10 \
                     and brick.rect.x + 40 > ball.rect.x > brick.rect.x - 35:
-                ball_dx = 2
-                ball_dy = -2
+                if ball_dy > 0:
+                    ball_dy = -2.5
+                else:
+                    ball_dy = 2.5
+                if ball_dx > 0:
+                    ball_dx = 2.5
+                else:
+                    ball_dx = -2.5
 
                 bounce_sound.play()
 
@@ -205,7 +213,7 @@ while game_loop:
                 brick.rect = pygame.Rect(1000, 1000, 0, 0)
                 bricks_count.remove(brick)
 
-    if birth_score > 100:
+    if birth_score > 4:
         paddle.rect.x = -35
         paddle.image = pygame.transform.scale(paddle.image, [655, 60])
 
@@ -213,10 +221,14 @@ while game_loop:
             if ball.rect.y < brick.rect.y + 25 and brick.rect.x + 20 > ball.rect.x > brick.rect.x - 20:
                 ball_dy *= -1
 
-        if ball.rect.y == 700:
+        if ball.rect.y > 700:
+            ball.rect.y == 698
             ball_dy *= -1
 
     screen.fill([0, 0, 0])
+
+    # Part of paddle collision function
+    check_paddle_collision()
 
     # Draw Hud and border details
     drawGroup.draw(screen)
