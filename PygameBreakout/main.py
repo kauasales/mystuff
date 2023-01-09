@@ -131,7 +131,7 @@ while game_loop:
     # Collision with the left wall
     if ball.rect.x <= 25:
         if ball.rect.x < 25:
-            ball.rect.x = 26
+            ball.rect.x = 28
         ball_dx *= -1
         bounce_sound.play()
 
